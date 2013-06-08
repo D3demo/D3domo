@@ -48,6 +48,16 @@ div.tooltip {
 <h1>D3 World Map Demo with Mouse Zooming</h1>
 <a href="http://techslides.com/d3-world-maps-tooltips-zooming-and-queue/" target="_blank">revised version of techslides</a>
 <div id="map"></div>
+<div id="buttons">
+<!--
+<input type="radio" class="radio inline" id ="basic_wages">basic_wages</button>
+-->
+<button id="basic_wages">basic_wages</button>
+<button id="electricity_charges">electricity_charges</button>
+<button id="milk">milk</button>
+<button id="criminal">criminal</button>
+<button id="office_rent">office_rent</button>
+</div>
 
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script src="http://d3js.org/queue.v1.min.js"></script>
@@ -74,6 +84,9 @@ var svg = d3.select("#map").append("svg")
     .on("zoom", redraw))
     .append("g");
 
+//button
+d3.select("#basic_wages").on("click",circles)
+//.on("click",function(){d3.select(this).attr("disabled","disabled")});
 
 function redraw() {
     svg.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
@@ -116,6 +129,18 @@ function ready(error, world) {
     .attr("d", path)
     //.style("fill", function(d, i) { return color(d.color = d3.max(neighbors[i], function(n) { return countries[n].color; }) + 1 | 0); });
 
+1
+    d3.csv("asia.csv", function(error, data) {
+      var city = svg.selectAll(".city").data(data);
+      city
+      .enter()
+      .insert("path")
+      .attr("class", "country")
+      .attr("title", function(d,i) { return d.country; })
+      .attr("d", path)
+    });
+
+
     //Show/hide tooltip
     country
     .on("mousemove", function(d,i) {
@@ -131,7 +156,10 @@ function ready(error, world) {
         tooltip.classed("hidden", true)
     });
 
-    var g = svg.append("g");
+}
+
+function circles(){
+  var g = svg.append("g");
     d3.csv("asia.csv", function(error, data) {
     g.selectAll("circle")
        .data(data)
@@ -150,8 +178,9 @@ function ready(error, world) {
        })
        .attr("class", "symbol");
      });
-
 }
+
+
 </script>
 </body>
 </html>
