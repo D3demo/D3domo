@@ -68,11 +68,11 @@ fill: #6B8E23;
 <!--
 <input type="radio" class="radio inline" id ="basic_wages">basic_wages</button>
 -->
-<button id="basic_wages">basic_wages</button>
-<button id="electricity_charges">electricity_charges</button>
-<button id="milk">milk</button>
-<button id="criminal">criminal</button>
-<button id="office_rent">office_rent</button>
+<button id="basic_wages">人件費</button>
+<button id="electricity_charges">電気料金</button>
+<button id="milk">牛乳</button>
+<button id="criminal">犯罪係数</button>
+<button id="office_rent">オフィス賃料</button>
 </div>
 
 <script src="http://d3js.org/d3.v3.min.js"></script>
@@ -101,8 +101,44 @@ var svg = d3.select("#map").append("svg")
     .append("g");
 
 //button
-d3.select("#basic_wages").on("click",circles)
-//.on("click",function(){d3.select(this).attr("disabled","disabled")});
+var cost_total = 0;
+var counter = 0;
+d3.select("#basic_wages").on("click",function(){
+  var cost = 0;
+  counter = counter + 1;
+  d3.select(this).attr("disabled","disabled").call(circles(cost,counter));
+
+  /*
+  if (d3.select(this).select("disabled").length == 1){
+    d3.select(this).remove("disabled", null);
+    //console.log( d3.select(this).select("disabled").length)
+  }
+  else{
+    d3.select(this).attr("disabled","disabled").call(circles);
+  }
+  */
+});
+d3.select("#electricity_charges").on("click",function(){
+  var cost = 1;
+  counter = counter + 1;
+  d3.select(this).attr("disabled","disabled").call(circles(cost,counter));
+});
+d3.select("#milk").on("click",function(){
+  var cost = 2;
+  counter = counter + 1;
+  d3.select(this).attr("disabled","disabled").call(circles(cost,counter));
+});
+d3.select("#criminal").on("click",function(){
+  var cost = 3;
+  counter = counter + 1;
+  d3.select(this).attr("disabled","disabled").call(circles(cost,counter));
+});
+d3.select("#office_rent").on("click",function(){
+  var cost = 4;
+  counter = counter + 1;
+  d3.select(this).attr("disabled","disabled").call(circles(cost,counter));
+});
+
 
 function redraw() {
     svg.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
@@ -145,7 +181,6 @@ function ready(error, world) {
     .attr("d", path)
     //.style("fill", function(d, i) { return color(d.color = d3.max(neighbors[i], function(n) { return countries[n].color; }) + 1 | 0); });
 
-1
     d3.csv("asia.csv", function(error, data) {
       var city = svg.selectAll(".city").data(data);
       city
@@ -174,7 +209,8 @@ function ready(error, world) {
 
 }
 
-function circles(){
+function circles(cost,counter){
+  if(d3.selectAll("circle").length != 0){d3.selectAll("circle").remove();}
   var g = svg.append("g");
     d3.csv("asia.csv", function(error, data) {
     g.selectAll("circle")
@@ -190,10 +226,17 @@ function circles(){
        })
        .attr("r", function(d) {
           //return 10;
-          return Math.sqrt(([d.basic_wages, d.electricity_charges, d.milk, d.criminal, d.office_rent])[0])*2;
+          /*
+          cost_total = cost_total + projection([d.basic_wages, d.electricity_charges, d.milk, d.criminal, d.office_rent])[cost];
+          return Math.sqrt((cost_total) * 2.5 / counter);
+          */
+          return Math.sqrt(([d.basic_wages, d.electricity_charges, d.milk, d.criminal, d.office_rent])[cost])*3;
        })
        .attr("class", "symbol");
      });
+  //console.log(g.selectAll("circle").length)
+  //console.log(counter)
+  console.log(cost_total)
 }
 
 
