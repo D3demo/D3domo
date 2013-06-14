@@ -44,7 +44,7 @@ div.tooltip {
 
 .symbol {
   fill: steelblue;
-  fill-opacity: 0.8;
+  fill-opacity: 0.9;
   stroke: #fff;
 }
 
@@ -171,7 +171,11 @@ function ready(error, world) {
       .attr("cy", function(d) {
           return projection([d.lon, d.lat])[1];
        })
-      .attr("r",15)
+      .attr("r",function(d) {
+        var cost_total = d.basic_wages + d.electricity_charges + d.milk + d.criminal + d.office_rent;
+        //console.log(cost_total)
+        return (10);
+      })
       .attr("class","symbol")
       .on("mousemove", function(d,i) {
         var mouse = d3.mouse(svg.node()).map( function(d) { return parseInt(d); } );
@@ -192,6 +196,7 @@ function ready(error, world) {
         rows[3] = d.milk
         rows[4] = d.criminal
         rows[5] = d.office_rent
+        rows[6] = d.basic_wages + d.electricity_charges + d.milk + d.criminal + d.office_rent
         pie_chart(rows)
       })
     });
@@ -237,13 +242,30 @@ function pie_chart(data){
     .innerRadius(radius - 70);
 */
   var g = svg.append("g");
-  g.selectAll("text")
+  g.selectAll("circle")
+      .data(data)
+      .enter()
+      .append("circle")
+      .attr("cx", 800)
+      .attr("cy", 200)
+      .attr("r", 1)
+      .attr("class", "symbol")
+      .transition()
+      .duration(1000)
+      .ease("bounce")
+      .delay(function(d, i) { return i * -10; })
+      .attr("r", function(d, i) {
+         return 100;
+       });
+
+     g.selectAll("text")
       .data(data)
       .enter()
       .append("text")
       .attr("x", 800)
       .attr("y", 200)
       .text(data[0])
+
 }
 
 
