@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <title>D3 World Map Demo with Area Zoom | TechSlides</title>
+<link rel="stylesheet" type="text/css" href="style.css" id="mystyle">
 <style>
 body {
   color: #666;
@@ -43,26 +44,12 @@ div.tooltip {
 }
 
 .symbol {
-  fill: steelblue;
+  fill: black;
   fill-opacity: 0.5;
   stroke: #fff;
 }
 
-#JPN, #KOR, #TWN, #MYS{
- fill: #dacc9e;
-}
-#CHN, #THA, #IDN{
- fill: #dacc9e;
- opacity:.75;
-}
-#IND,#VNM,#LAO,#BTN,#PHL{
-fill: #dacc9e;
- opacity:.5;
-}
-#BNG,#KHM,#MMR,#NPL,#BGD{
-fill: #dacc9e;
- opacity:.25;
-}
+
 
 .axis path,
 .axis line {
@@ -88,6 +75,13 @@ fill: #dacc9e;
 <body>
 <h1>消えるフロンティア</h1>
 <h2>進出戦略、事業コスト見極め</h2>
+
+<select onchange="changesytle(value);">
+   <option value="">スタイルなし</option>
+   <option value="n_gdp.css">一人あたりの名目GDP</option>
+   <option value="car_export.css">自動車・自動車部品の輸出額(USドル、2011)</option>
+   <option value="car_import.css">自動車・自動車部品の輸入額(USドル、2011)</option>
+</select>
 
 <div id="map"></div>
 
@@ -127,6 +121,11 @@ var svg = d3.select("#map").append("svg")
     .on("zoom", redraw))
     .append("g");
 
+
+//map_undercoat
+function changesytle(cssfile) {
+  document.getElementById('mystyle').href = cssfile;
+}
 
 function redraw() {
     svg.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");

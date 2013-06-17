@@ -23,9 +23,27 @@ body {
 
 </style>
 <body>
+
+<form name="form">
+  <label><input type="checkbox" id="basic_wages" name="bw"> 人件費 </label>
+  <label><input type="checkbox" id="electricity_charges" name="ec" > 電気料金 </label>
+  <label><input type="checkbox" id="milk" name="mi"> 牛乳 </label>
+  <label><input type="checkbox" id="criminal" name="cr"> 犯罪係数 </label>
+  <label><input type="checkbox" id="office_rent" name="or"> オフィス賃料 </label>
+</form>
+
+<div id="bar"></div>
+
 <script src="http://d3js.org/d3.v3.min.js"></script>
 </body>
 <script>
+var check_basic_wages = "off"
+d3.select("#basic_wages").on("click",function(){
+  if(document.form.bw.checked == false){
+    check_basic_wages = "off"
+  }
+});
+
 
 var margin = {top: 40, right: 20, bottom: 20, left: 100},
     width = 960 - margin.left - margin.right,
@@ -49,7 +67,7 @@ var yAxis = d3.svg.axis()
     .orient("top")
     .tickFormat(d3.format(".2s"));
 
-var svg = d3.select("body").append("svg")
+var svg = d3.select("#bar").append("svg")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
     .append("g")
@@ -63,7 +81,8 @@ d3.csv("asia_remove_latlon.csv", function(error, data) {
   data.forEach(function(d) {
     var y0 = 0;
     d.costs = color.domain().map(function(name) {
-      //if(name ==  "basic_wages"){return {name: name, y0: y0, y1: y0};}
+      if(name ==  "basic_wages"){return {name: name, y0: y0, y1: y0};}
+      if(name ==  "office_rent"){return {name: name, y0: y0, y1: y0};}
       return {name: name, y0: y0, y1: y0 += +d[name]}; });
     d.total = d.costs[d.costs.length - 1].y1;
     //console.log(d.total)
@@ -116,19 +135,18 @@ d3.csv("asia_remove_latlon.csv", function(error, data) {
       .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
 
   legend.append("rect")
-      .attr("x", width - 18)
-      .attr("y", 290)
+      .attr("x", width - 50)
+      .attr("y", 350)
       .attr("width", 18)
       .attr("height", 18)
       .style("fill", color);
 
   legend.append("text")
-      .attr("x", width - 24)
-      .attr("y", 300)
+      .attr("x", width - 55)
+      .attr("y", 360)
       .attr("dy", "0.35em")
       .style("text-anchor", "end")
       .text(function(d) { return d; });
-
 
 });
 
