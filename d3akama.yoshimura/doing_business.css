@@ -1,0 +1,15 @@
+@charset "utf-8";
+
+#JPN, #TWN, #MYS,#THA{
+ fill: blue;
+}
+#BRN,#CHN,#VNM,#NPL{
+ fill: yellow;
+}
+#IND,#PHL,#KHM,#MMR,#BGD,#BTN{
+fill: green;
+ opacity:.5;
+}
+#LAO{
+fill: red;
+}

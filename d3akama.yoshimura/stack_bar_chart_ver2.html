@@ -107,7 +107,6 @@ d3.csv("asia_remove_latlon.csv", function(error, data) {
       .attr("width", function(d) { return y(d.y1) - y(d.y0); })
       .style("fill", function(d) { return color(d.name); })
 
-
 //legend
   var legend = svg.selectAll(".legend")
       .data(color.domain().slice().reverse())

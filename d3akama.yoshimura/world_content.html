@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>D3 World Map Demo with Area Zoom | TechSlides</title>
+<link rel="stylesheet" type="text/css" href="style.css" id="mystyle">
+<style>
+body {
+  color: #666;
+  background: #f3f3f3;
+  font: normal 10px "Helvetica Neue", Helvetica, sans-serif;
+  margin: 2em;
+}
+#map {
+  border:2px solid #000;
+  width:960px;
+  height:550px;
+}
+.country {
+  fill: #aaa;
+  stroke: #fff;
+  stroke-width: 1px;
+  stroke-linejoin: round;
+}
+
+.hidden {
+  display: none;
+}
+div.tooltip {
+  color: #222;
+  background: #fff;
+  padding: .5em;
+  text-shadow: #f5f5f5 0 1px 0;
+  border-radius: 2px;
+  box-shadow: 0px 0px 2px 0px #a6a6a6;
+  opacity: 0.9;
+  position: absolute;
+}
+
+.symbol {
+  fill: steelblue;
+  fill-opacity: .8;
+  stroke: #fff;
+}
+
+</style>
+</head>
+<body>
+<h1>D3 World Map Demo with Mouse Zooming</h1>
+
+<select onchange="changesytle(value);">
+   <option value="">スタイルなし</option>
+   <option value="n_gdp.css">一人あたりの名目GDP</option>
+   <option value="car_export.css">自動車・自動車部品の輸出額(USドル、2011)</option>
+   <option value="car_import.css">自動車・自動車部品の輸入額(USドル、2011)</option>
+   <option value="anime_manga.css">アニメ・漫画</option>
+</select>
+
+<div id="map"></div>
+
+<script src="http://d3js.org/d3.v3.js"></script>
+<script src="http://d3js.org/queue.v1.min.js"></script>
+<script src="topojson.js"></script>
+<script>
+// The SVG container
+var width  = 960,
+    height = 550;
+
+var m = 21; // number of country
+
+var positions = [],locations = [],sumArray = [],sumAllArray = [], _BW, _EC, _MI, _CR, _OR, _lon, _lat;
+
+var color = d3.scale.category10();
+
+var projection = d3.geo.mercator()
+                .center([-10, 20.4])
+                .translate([-350, 300])
+                .scale((width + 1) / 0.8 / Math.PI);
+
+var path = d3.geo.path()
+    .projection(projection);
+
+var svg = d3.select("#map").append("svg")
+    .attr("width", width)
+    .attr("height", height)
+    .call(d3.behavior.zoom()
+    .on("zoom", redraw))
+    .append("g");
+
+
+function redraw() {
+    svg.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+}
+
+var tooltip = d3.select("#map").append("div")
+    .attr("class", "tooltip");
+//map data convert from https://github.com/johan/world.geo.json/blob/master/countries.geo.json
+//tsv file is not used, but left the code for data join sample
+queue()
+    .defer(d3.json, "topo_world_countries_with_meta.json")
+    //.defer(d3.tsv, "world-country-names.tsv")
+    .await(ready);
+
+//function ready(error, world, names) {
+function ready(error, world) {
+
+  var countries = topojson.object(world, world.objects.countries).geometries,
+//      neighbors = topojson.neighbors(world, countries),
+      i = -1,
+      n = countries.length;
+
+    var country = svg.selectAll(".country").data(countries);
+    country
+    .enter()
+    .insert("path")
+    .attr("class", "country")
+    .attr("title", function(d,i) { return d.properties.name; })
+    .attr("id", function(d,i) { return d.id; })
+    .attr("d", path);
+    //.style("fill", function(d, i) { return color(d.color = d3.max(neighbors[i], function(n) { return countries[n].color; }) + 1 | 0); });
+
+    //Show/hide tooltip
+    country
+    .on("mousemove", function(d,i) {
+        var mouse = d3.mouse(svg.node()).map( function(d) { return parseInt(d); } );
+
+        tooltip
+        .classed("hidden", false)
+        .attr("style", "left:"+(mouse[0]+25)+"px;top:"+mouse[1]+"px")
+        //.html(d.properties.japanese)
+        .html(d.properties.name)
+    })
+    .on("mouseout",  function(d,i) {
+        tooltip.classed("hidden", true)
+    });
+
+    // city name
+    var g = svg.append("g");
+    d3.csv("asia_contents.csv", function(error, data) {
+      g.selectAll("circle")
+      .data(data)
+      .enter()
+      .append("circle")
+      .attr("id", function(d) { return d.city_id; })
+      .attr("cx", function(d) {
+          return projection([d.lon, d.lat])[0];
+       })
+      .attr("cy", function(d) {
+          return projection([d.lon, d.lat])[1];
+       })
+      .attr("r",10)
+      });
+
+    d3.csv("asia_contents.csv", function(error, data) {
+      g.selectAll("text")
+      .data(data)
+      .enter()
+      .append("text")
+      .text(function(d) {
+        return d.country;
+      })
+      .attr("x", function(d) {
+          return projection([d.lon, d.lat])[0] + 15;
+       })
+      .attr("y", function(d) {
+          return projection([d.lon, d.lat])[1];
+       });
+
+    });
+}
+
+function changesytle(cssfile) {
+  document.getElementById('mystyle').href = cssfile;
+}
+
+</script>
+</body>
+</html>

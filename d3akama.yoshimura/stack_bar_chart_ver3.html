@@ -1,20 +1,12 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
+<link rel="stylesheet" href="style.css">
 <style>
-
-body {
-  font: 10px sans-serif;
-}
-
 .axis path,
 .axis line {
   fill: none;
   stroke: #000;
   shape-rendering: crispEdges;
-}
-
-.bar {
-  fill: steelblue;
 }
 
 .x.axis path {
@@ -23,13 +15,19 @@ body {
 
 </style>
 <body>
+<h1>消えるフロンティア</h1>
+<h2>進出戦略、事業コスト見極め</h2>
+<p>日本企業の進出先として脚光を浴びてきた中国は人件費の急上昇で製造拠点としての競争力が低下している。次の進出先として有望なのはどこか。</p>
+<p>日本企業が古くから拠点を構えてきたタイ・バンコクを100としてアジア各都市のビジネスコストを算出してみた。人件費に、不動産、インフラ、生活、治安の各コストを加え、総合的な事業コストを比較。</p>
+<p>浮かび上がってきたのは、どの都市にも一長一短があり、バンコクに比べて極端にコストが低い都市はないという事実だ。低コストのフロンティアが消えるなかで、企業は事業内容にふさわしい進出先をこれまで以上に慎重に探していく必要がありそうだ。</p>
+<hr>
 
 <form name="form">
-  <label><input type="checkbox" id="basic_wages" name="bw"> 人件費 </label>
-  <label><input type="checkbox" id="electricity_charges" name="ec" > 電気料金 </label>
-  <label><input type="checkbox" id="milk" name="mi"> 牛乳 </label>
-  <label><input type="checkbox" id="criminal" name="cr"> 犯罪係数 </label>
-  <label><input type="checkbox" id="office_rent" name="or"> オフィス賃料 </label>
+  <label id="basic_wages"><input type="checkbox" id="basic_wages" name="bw" checked="checked"> 人件費 </label>
+  <label id="electricity_charges"><input type="checkbox" id="electricity_charges" name="ec" > 電気料金 </label>
+  <label id="milk"><input type="checkbox" id="milk" name="mi"> 牛乳 </label>
+  <label id="criminal"><input type="checkbox" id="criminal" name="cr"> 犯罪係数 </label>
+  <label id="office_rent"><input type="checkbox" id="office_rent" name="or"> オフィス賃料 </label>
 </form>
 
 <div id="bar"></div>
@@ -37,17 +35,66 @@ body {
 <script src="http://d3js.org/d3.v3.min.js"></script>
 </body>
 <script>
-var check_basic_wages = "off"
+//check cost
+
+//first
+var check_basic_wages = "on"
+stack_bar()
+
 d3.select("#basic_wages").on("click",function(){
   if(document.form.bw.checked == false){
     check_basic_wages = "off"
   }
+  else{
+    check_basic_wages = "on"
+  }
+  d3.select(this).call(stack_bar);
+});
+var check_electricity_charges = "off"
+d3.select("#electricity_charges").on("click",function(){
+  if(document.form.ec.checked == false){
+    check_electricity_charges = "off"
+  }
+  else{
+    check_electricity_charges = "on"
+  }
+  d3.select(this).call(stack_bar);
+});
+var check_milk = "off"
+d3.select("#milk").on("click",function(){
+  if(document.form.mi.checked == false){
+    check_milk = "off"
+  }
+  else{
+    check_milk = "on"
+  }
+  d3.select(this).call(stack_bar);
+});
+var check_criminal = "off"
+d3.select("#criminal").on("click",function(){
+  if(document.form.cr.checked == false){
+    check_criminal = "off"
+  }
+  else{
+    check_criminal = "on"
+  }
+  d3.select(this).call(stack_bar);
+});
+var check_office_rent = "off"
+d3.select("#office_rent").on("click",function(){
+  if(document.form.or.checked == false){
+    check_office_rent = "off"
+  }
+  else{
+    check_office_rent = "on"
+  }
+  d3.select(this).call(stack_bar);
 });
 
 
-var margin = {top: 40, right: 20, bottom: 20, left: 100},
-    width = 960 - margin.left - margin.right,
-    height = 500 - margin.top - margin.bottom;
+var margin = {top: 40, right: 20, bottom: 20, left: 120},
+    width = 600 - margin.left - margin.right,
+    height = 400 - margin.top - margin.bottom;
 
 var x = d3.scale.ordinal()
     .rangeRoundBands([0, height], .1);
@@ -71,22 +118,42 @@ var svg = d3.select("#bar").append("svg")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
     .append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
 
-d3.csv("asia_remove_latlon.csv", function(error, data) {
+function stack_bar(){
+  //delete graph
+  if(d3.selectAll("rect").length != 0){
+    d3.selectAll("rect").remove();
+    d3.selectAll("text").remove();
+    d3.selectAll("line").remove();
+  }
+
+  d3.csv("asia_remove_latlon.csv", function(error, data) {
   color.domain(d3.keys(data[0]).filter(function(key) { return key !== "country"; }));
-
-
   //stack bar
   data.forEach(function(d) {
     var y0 = 0;
     d.costs = color.domain().map(function(name) {
-      if(name ==  "basic_wages"){return {name: name, y0: y0, y1: y0};}
-      if(name ==  "office_rent"){return {name: name, y0: y0, y1: y0};}
+      if(check_basic_wages == "off"){
+        if(name ==  "basic_wages"){return {name: name, y0: y0, y1: y0};}
+      }
+      if(check_electricity_charges == "off"){
+        if(name ==  "electricity_charges"){return {name: name, y0: y0, y1: y0};}
+      }
+      if(check_milk == "off"){
+        if(name ==  "milk"){return {name: name, y0: y0, y1: y0};}
+      }
+      if(check_criminal == "off"){
+        if(name ==  "criminal"){return {name: name, y0: y0, y1: y0};}
+      }
+      if(check_office_rent == "off"){
+        if(name ==  "office_rent"){return {name: name, y0: y0, y1: y0};}
+      }
+
       return {name: name, y0: y0, y1: y0 += +d[name]}; });
-    d.total = d.costs[d.costs.length - 1].y1;
-    //console.log(d.total)
-  });
+      d.total = d.costs[d.costs.length - 1].y1;
+      //console.log(d.total)
+    });
 
   data.sort(function(a, b) { return b.total - a.total; });
 
@@ -99,7 +166,6 @@ d3.csv("asia_remove_latlon.csv", function(error, data) {
       //.attr("transform", "translate(0," + height + ")")
       .call(xAxis);
 
-
 //縦軸
   svg.append("g")
    .attr("class", "y axis")
@@ -109,45 +175,59 @@ d3.csv("asia_remove_latlon.csv", function(error, data) {
       .attr("x", 6)
       .attr("dx", ".71em")
       .style("text-anchor", "end")
-      //.text("Population");
-
 
   var city = svg.selectAll(".city")
       .data(data)
       .enter().append("g")
       .attr("class", "g")
-      .attr("transform", function(d) { return "translate(0, " + x(d.country) + ")"; });
+      .attr("transform", function(d) { return "translate(0, " + x(d.country) + ")"; })
+      .attr("id", function(d) { return d.country; })
 
   city.selectAll("rect")
       .data(function(d) { return d.costs; })
       .enter().append("rect")
       .attr("height", x.rangeBand())
       .attr("x", function(d) { return y(d.y0); })
-      .attr("width", function(d) { return y(d.y1) - y(d.y0); })
+      .attr("width", function(d) { return 0; })
       .style("fill", function(d) { return color(d.name); })
+      .transition()
+      .delay(function(d, i) {
+        /*
+        if(check_basic_wages == "off"){
+          if(d.name == "basic_wages"){
+            //count = i - 1;
+          }
+        }
+        if(check_electricity_charges == "off"){
+          if(d.name == "electricity_charges"){
+            //count = i - 1;
+          }
+        }
+        if(check_milk == "off"){
+          if(d.name == "milk"){
+            //count = i - 1;
+          }
+        }
+        if(check_criminal == "off"){
+          if(d.name == "criminal"){
+            //count = i - 1;
+          }
+        }
+        if(check_office_rent == "off"){
+          if(d.name == "office_rent"){
+           // count = i - 1;
+          }
+        }
+        */
+        return i * 100; })
+      .duration(100)
+      .ease("linear")
+      .attr("width", function(d, i) {
+         return y(d.y1) - y(d.y0);
+      })
 
+    });
 
-//legend
-  var legend = svg.selectAll(".legend")
-      .data(color.domain().slice().reverse())
-      .enter().append("g")
-      .attr("class", "legend")
-      .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
-
-  legend.append("rect")
-      .attr("x", width - 50)
-      .attr("y", 350)
-      .attr("width", 18)
-      .attr("height", 18)
-      .style("fill", color);
-
-  legend.append("text")
-      .attr("x", width - 55)
-      .attr("y", 360)
-      .attr("dy", "0.35em")
-      .style("text-anchor", "end")
-      .text(function(d) { return d; });
-
-});
+}
 
 </script>

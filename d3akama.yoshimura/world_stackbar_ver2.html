@@ -81,6 +81,7 @@ div.tooltip {
    <option value="n_gdp.css">一人あたりの名目GDP</option>
    <option value="car_export.css">自動車・自動車部品の輸出額(USドル、2011)</option>
    <option value="car_import.css">自動車・自動車部品の輸入額(USドル、2011)</option>
+   <option value="doing_business.css">ビジネスのしやすさランキング</option>
 </select>
 
 <div id="map"></div>
@@ -181,16 +182,20 @@ function ready(error, world) {
 
         tooltip
         .classed("hidden", false)
-        .attr("style", "left:"+(mouse[0]+25)+"px;top:"+(mouse[1]+30)+"px;font-size:12px;line-height:5px;")
+        .attr("style", "left:"+(mouse[0]+0)+"px;top:"+(mouse[1]+100)+"px;font-size:12px;line-height:5px;")
         //.html(d.properties.japanese)
+
         .html(function(){
           //console.log(d.country)
+          return d.country
+/*
           if(d.country == "横浜"){
           return '<strong>横浜</strong><p>横浜のコメント</p>';
           }
           else if(d.country == "ソウル"){
           return '<strong>ソウル</strong><p>ソウルのコメント</p>';
           }
+        */
         });
 
       })

@@ -1,0 +1,25 @@
+@charset "utf-8";
+
+body {
+  font: 0.8em sans-serif;
+}
+
+p {
+	color: gray;
+}
+
+#basic_wages {
+	color: #3182bd;
+}
+#electricity_charges{
+	color: #6baed6
+}
+#milk {
+	color: #9ecae1;
+}
+#criminal{
+	color: #c6dbef;
+}
+#office_rent{
+	color: #dadaeb;
+}
