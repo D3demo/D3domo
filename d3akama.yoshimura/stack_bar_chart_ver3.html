@@ -13,6 +13,10 @@
   display: none;
 }
 
+.x.axis text{
+  fill: ;
+}
+
 </style>
 <body>
 <h1>消えるフロンティア</h1>
@@ -102,8 +106,9 @@ var x = d3.scale.ordinal()
 var y = d3.scale.linear()
     .rangeRound([0, width]);
 
-var color = d3.scale.ordinal()
-    .range(["#3182bd","#6baed6","#9ecae1","#c6dbef","#dadaeb"]);
+var color = d3.scale.category20b();
+    //.ordinal()
+    //.range(["#3182bd","#6baed6","#9ecae1","#c6dbef","#dadaeb"]);
 
 var xAxis = d3.svg.axis()
     .scale(x)
@@ -123,7 +128,7 @@ var svg = d3.select("#bar").append("svg")
 function stack_bar(){
   //delete graph
   if(d3.selectAll("rect").length != 0){
-    d3.selectAll("rect").remove();
+    d3.selectAll("rect").remove()
     d3.selectAll("text").remove();
     d3.selectAll("line").remove();
   }
@@ -174,17 +179,16 @@ function stack_bar(){
       //.attr("transform", "rotate(-90)")
       .attr("x", 6)
       .attr("dx", ".71em")
-      .style("text-anchor", "end")
+      .style("text-anchor", "end");
 
   var city = svg.selectAll(".city")
       .data(data)
       .enter().append("g")
       .attr("class", "g")
       .attr("transform", function(d) { return "translate(0, " + x(d.country) + ")"; })
-      .attr("id", function(d) { return d.country; })
 
   city.selectAll("rect")
-      .data(function(d) { return d.costs; })
+      .data(function(d) {return d.costs; })
       .enter().append("rect")
       .attr("height", x.rangeBand())
       .attr("x", function(d) { return y(d.y0); })
