@@ -28,10 +28,10 @@
 
 <form name="form">
   <label id="basic_wages"><input type="checkbox" id="basic_wages" name="bw" checked="checked"> 人件費 </label>
+  <label id="office_rent"><input type="checkbox" id="office_rent" name="or"> オフィス賃料 </label>
   <label id="electricity_charges"><input type="checkbox" id="electricity_charges" name="ec" > 電気料金 </label>
   <label id="milk"><input type="checkbox" id="milk" name="mi"> 牛乳 </label>
   <label id="criminal"><input type="checkbox" id="criminal" name="cr"> 犯罪係数 </label>
-  <label id="office_rent"><input type="checkbox" id="office_rent" name="or"> オフィス賃料 </label>
 </form>
 
 <div id="bar"></div>
@@ -51,6 +51,16 @@ d3.select("#basic_wages").on("click",function(){
   }
   else{
     check_basic_wages = "on"
+  }
+  d3.select(this).call(stack_bar);
+});
+var check_office_rent = "off"
+d3.select("#office_rent").on("click",function(){
+  if(document.form.or.checked == false){
+    check_office_rent = "off"
+  }
+  else{
+    check_office_rent = "on"
   }
   d3.select(this).call(stack_bar);
 });
@@ -84,16 +94,6 @@ d3.select("#criminal").on("click",function(){
   }
   d3.select(this).call(stack_bar);
 });
-var check_office_rent = "off"
-d3.select("#office_rent").on("click",function(){
-  if(document.form.or.checked == false){
-    check_office_rent = "off"
-  }
-  else{
-    check_office_rent = "on"
-  }
-  d3.select(this).call(stack_bar);
-});
 
 
 var margin = {top: 40, right: 20, bottom: 20, left: 120},
@@ -106,9 +106,9 @@ var x = d3.scale.ordinal()
 var y = d3.scale.linear()
     .rangeRound([0, width]);
 
-var color = d3.scale.category20b();
+var color = d3.scale.category20c()
     //.ordinal()
-    //.range(["#3182bd","#6baed6","#9ecae1","#c6dbef","#dadaeb"]);
+    //.range(["steelblue","lightgreen","sandybrown","lightgray","dimgray"]);
 
 var xAxis = d3.svg.axis()
     .scale(x)
@@ -128,7 +128,7 @@ var svg = d3.select("#bar").append("svg")
 function stack_bar(){
   //delete graph
   if(d3.selectAll("rect").length != 0){
-    d3.selectAll("rect").remove()
+    d3.selectAll("rect").transition().delay(0).duration(1100).remove()
     d3.selectAll("text").remove();
     d3.selectAll("line").remove();
   }
@@ -142,6 +142,9 @@ function stack_bar(){
       if(check_basic_wages == "off"){
         if(name ==  "basic_wages"){return {name: name, y0: y0, y1: y0};}
       }
+      if(check_office_rent == "off"){
+        if(name ==  "office_rent"){return {name: name, y0: y0, y1: y0};}
+      }
       if(check_electricity_charges == "off"){
         if(name ==  "electricity_charges"){return {name: name, y0: y0, y1: y0};}
       }
@@ -151,9 +154,7 @@ function stack_bar(){
       if(check_criminal == "off"){
         if(name ==  "criminal"){return {name: name, y0: y0, y1: y0};}
       }
-      if(check_office_rent == "off"){
-        if(name ==  "office_rent"){return {name: name, y0: y0, y1: y0};}
-      }
+
 
       return {name: name, y0: y0, y1: y0 += +d[name]}; });
       d.total = d.costs[d.costs.length - 1].y1;
@@ -194,6 +195,15 @@ function stack_bar(){
       .attr("x", function(d) { return y(d.y0); })
       .attr("width", function(d) { return 0; })
       .style("fill", function(d) { return color(d.name); })
+      .style("stroke", function(d){
+        console.log(d)
+        if(d.y1 == 20 || d.y1 == 40 || d.y1 == 60 || d.y1 == 80 || d.y1 == 100){
+          return "red";
+        }
+        else{
+          return "";
+        }
+      })
       .transition()
       .delay(function(d, i) {
         /*
@@ -224,7 +234,7 @@ function stack_bar(){
         }
         */
         return i * 100; })
-      .duration(100)
+      .duration(1000)
       .ease("linear")
       .attr("width", function(d, i) {
          return y(d.y1) - y(d.y0);

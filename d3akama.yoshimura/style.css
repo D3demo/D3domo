@@ -9,17 +9,17 @@ p {
 }
 
 #basic_wages {
-	color: #3182bd;
-}
-#electricity_charges{
-	color: #6baed6
-}
-#milk {
-	color: #9ecae1;
-}
-#criminal{
-	color: #c6dbef;
+	color: steelblue;
 }
 #office_rent{
-	color: #dadaeb;
+	color: lightgreen;
+}
+#electricity_charges {
+	color: sandybrown;
+}
+#milk{
+	color: lightgray;
+}
+#criminal{
+	color: dimgray;
 }
