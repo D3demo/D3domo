@@ -492,11 +492,11 @@ var svg_s = d3.select("#bar").append("svg")
 
 function stack_bar(){
   //delete graph
-  if(d3.selectAll("rect").length != 0){
-    d3.selectAll("rect").remove();
+  if(svg_s.selectAll("rect").length != 0){
+    svg_s.selectAll("rect").remove();
     //d3.selectAll("rect").transition().delay(0).duration(1100).remove();
-    d3.selectAll("text").remove();
-    d3.selectAll("line").remove();
+    svg_s.selectAll("text").remove();
+    svg_s.selectAll("line").remove();
   }
 
   d3.csv("asia_remove_latlon.csv", function(error, data) {
@@ -572,33 +572,6 @@ function stack_bar(){
       })
       .transition()
       .delay(function(d, i) {
-        /*
-        if(check_basic_wages == "off"){
-          if(d.name == "basic_wages"){
-            //count = i - 1;
-          }
-        }
-        if(check_electricity_charges == "off"){
-          if(d.name == "electricity_charges"){
-            //count = i - 1;
-          }
-        }
-        if(check_milk == "off"){
-          if(d.name == "milk"){
-            //count = i - 1;
-          }
-        }
-        if(check_criminal == "off"){
-          if(d.name == "criminal"){
-            //count = i - 1;
-          }
-        }
-        if(check_office_rent == "off"){
-          if(d.name == "office_rent"){
-           // count = i - 1;
-          }
-        }
-        */
         return i * 100; })
       .duration(100)
       .ease("linear")
