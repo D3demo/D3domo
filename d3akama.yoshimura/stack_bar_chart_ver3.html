@@ -128,7 +128,8 @@ var svg = d3.select("#bar").append("svg")
 function stack_bar(){
   //delete graph
   if(d3.selectAll("rect").length != 0){
-    d3.selectAll("rect").transition().delay(0).duration(1100).remove()
+    d3.selectAll("rect").remove();
+    //d3.selectAll("rect").transition().delay(0).duration(1100).remove();
     d3.selectAll("text").remove();
     d3.selectAll("line").remove();
   }
@@ -234,7 +235,7 @@ function stack_bar(){
         }
         */
         return i * 100; })
-      .duration(1000)
+      .duration(100)
       .ease("linear")
       .attr("width", function(d, i) {
          return y(d.y1) - y(d.y0);
