@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>D3 World Map Demo with Area Zoom | TechSlides</title>
+<style>
+body {
+  color: #666;
+  background: #f3f3f3;
+  font: normal 10px "Helvetica Neue", Helvetica, sans-serif;
+  margin: 2em;
+}
+#map {
+  border:2px solid #000;
+  width:960px;
+  height:550px;
+}
+.country {
+  fill: #aaa;
+  stroke: #fff;
+  stroke-width: 1px;
+  stroke-linejoin: round;
+}
+
+.hidden {
+  display: none;
+}
+div.tooltip {
+  color: #222;
+  background: #fff;
+  padding: .5em;
+  text-shadow: #f5f5f5 0 1px 0;
+  border-radius: 2px;
+  box-shadow: 0px 0px 2px 0px #a6a6a6;
+  opacity: 0.9;
+  position: absolute;
+}
+
+.symbol {
+  fill: steelblue;
+  fill-opacity: 0.8;
+  stroke: #fff;
+}
+.symbol_base {
+  fill: red;
+  fill-opacity: 0.5;
+  stroke: #fff;
+}
+.symbol_bw {
+  fill: blue;
+  fill-opacity: 1;
+  stroke: #fff;
+}
+.symbol_ec {
+  fill: red;
+  fill-opacity: 1;
+  stroke: #fff;
+}
+.symbol_mi {
+  fill: green;
+  fill-opacity: 1;
+  stroke: #fff;
+}
+.symbol_cr {
+  fill: yellow;
+  fill-opacity: 1;
+  stroke: #fff;
+}
+.symbol_or {
+  fill: orange;
+  fill-opacity: 1;
+  stroke: #fff;
+}
+
+
+#JPN, #KOR, #TWN, #MYS{
+ fill: #6B8E23;
+}
+#CHN, #THA, #IDN{
+ fill: #6B8E23;
+ opacity:.75;
+}
+#IND,#VNM,#LAO,#BTN,#PHL{
+fill: #6B8E23;
+ opacity:.5;
+}
+#BNG,#KHM,#MMR,#NPL,#BGD{
+fill: #6B8E23;
+ opacity:.25;
+}
+
+</style>
+</head>
+<body>
+<h1>消えるフロンティア</h1>
+<h2>海外戦略、事業コスト見極め</h2>
+
+<!--
+<form name="form">
+  <label><input type="radio" name="circletransition" checked> 円グラフ </label>
+  <label><input type="radio" name="bartransition"> 棒グラフ </label>
+</form>
+-->
+
+<div id="map"></div>
+
+<form name="form">
+  <label><input type="checkbox" id="basic_wages" name="bw"> 人件費 </label>
+  <label><input type="checkbox" id="electricity_charges" name="ec" > 電気料金 </label>
+  <label><input type="checkbox" id="milk" name="mi"> 牛乳 </label>
+  <label><input type="checkbox" id="criminal" name="cr"> 犯罪係数 </label>
+  <label><input type="checkbox" id="office_rent" name="or"> オフィス賃料 </label>
+</form>
+
+
+
+<script src="http://d3js.org/d3.v3.js"></script>
+<script src="http://d3js.org/queue.v1.min.js"></script>
+<script src="topojson.js"></script>
+<script>
+// The SVG container
+var width  = 960,
+    height = 550;
+
+var m = 19; // number of country
+
+var positions = [],locations = [],sumArray = [],sumAllArray = [], countries = [], num = [], _BW, _EC, _MI, _CR, _OR, Country, _lon, _lat;
+
+var tep, i, p, q = 0;
+
+var color = d3.scale.category10();
+
+var projection = d3.geo.mercator()
+                .center([-10, 20.4])
+                .translate([-350, 300])
+                .scale((width + 1) / 0.8 / Math.PI);
+
+var path = d3.geo.path()
+    .projection(projection);
+
+var svg = d3.select("#map").append("svg")
+    .attr("width", width)
+    .attr("height", height)
+    .call(d3.behavior.zoom()
+    .on("zoom", redraw))
+    .append("g");
+
+//button
+var cost_total = 0;
+var counter = 0;
+var width = 20;
+
+d3.csv("asia.csv", function(rows) {
+   Country = rows.map(function(d) { return [ +d["country"] ]; });
+   _BW = rows.map(function(d) { return [ +d["basic_wages"] ]; });
+   _EC = rows.map(function(d) { return [ +d["electricity_charges"] ]; });
+   _MI = rows.map(function(d) { return [ +d["milk"] ]; });
+   _CR = rows.map(function(d) { return [ +d["criminal"] ]; });
+   _OR = rows.map(function(d) { return [ +d["office_rent"] ]; });
+   _lon = rows.map(function(d) { return [ +d["lon"] ]; });
+   _lat = rows.map(function(d) { return [ +d["lat"] ]; });
+
+   // positions.push(projection(_lon, _lat));
+
+   for(var i = 0; i < m; i++) {
+     sumArray[i]= 0;
+     locations[i] = [projection([_lon[i],_lat[i]])[0], projection([_lon[i],_lat[i]])[1]];
+     // positions.push(locations[i]);
+     //console.log(Country[i])
+     countries[i] = Country[i];
+
+     }
+
+   // sumAllArray = [locations, sumArray];
+   // sumAllArray = [positions, sumArray];
+
+});
+
+
+d3.select("#basic_wages").on("click",function(){
+  if(document.form.bw.checked == false){
+    for (var i = 0; i < _BW.length; i++) {
+      sumArray[i] = Number(sumArray[i]) - Number(_BW[i]);
+    };
+    is_bw = "out";
+    d3.select(this).call(sumRects);
+  }
+  else{
+    var cost = 0;
+    counter = counter + 1;
+    for (var i = 0; i < _BW.length; i++) {
+      sumArray[i] = Number(sumArray[i]) + Number(_BW[i]);
+    };
+    // d3.select(this).call(circles(cost,counter));
+    is_bw = "in"
+    d3.select(this).call(sumRects());
+  }
+
+});
+d3.select("#electricity_charges").on("click",function(){
+  if(document.form.ec.checked == false){
+    // console.log("cost");
+    for (var i = 0; i < _EC.length; i++) {
+    sumArray[i] = Number(sumArray[i]) - Number(_EC[i]);
+    };
+  is_ec = "out";
+  d3.select(this).call(sumRects);
+  }
+  else{
+    var cost = 1;
+    counter = counter + 1;
+    for (var i = 0; i < _EC.length; i++) {
+      sumArray[i] = Number(sumArray[i]) + Number(_EC[i]);
+    };
+    // d3.select(this).call(circles(cost,counter));
+    is_ec = "in";
+    d3.select(this).call(sumRects);
+  }
+});
+d3.select("#milk").on("click",function(){
+  if(document.form.mi.checked == false){
+    for (var i = 0; i < _MI.length; i++) {
+      sumArray[i] = Number(sumArray[i]) - Number(_MI[i]);
+    };
+    is_mi = "out";
+    d3.select(this).call(sumRects);
+  }else{
+    var cost = 2;
+    counter = counter + 1;
+    for (var i = 0; i < _MI.length; i++) {
+      sumArray[i] = Number(sumArray[i]) + Number(_MI[i]);
+    };
+    // d3.select(this).call(circles(cost,counter));
+    is_mi = "in";
+    d3.select(this).call(sumRects);
+  }
+});
+d3.select("#criminal").on("click",function(){
+  if(document.form.cr.checked == false){
+    for (var i = 0; i < _CR.length; i++) {
+      sumArray[i] = Number(sumArray[i]) - Number(_CR[i]);
+    };
+    is_cr = "out";
+    d3.select(this).call(sumRects);
+  }else{
+    var cost = 3;
+    counter = counter + 1;
+    for (var i = 0; i < _CR.length; i++) {
+      sumArray[i] = Number(sumArray[i]) + Number(_CR[i]);
+    };
+    // d3.select(this).call(circles(cost,counter));
+    is_cr = "in";
+    d3.select(this).call(sumRects);
+
+  }
+});
+d3.select("#office_rent").on("click",function(){
+  if(document.form.or.checked == false){
+    for (var i = 0; i < _OR.length; i++) {
+      sumArray[i] = Number(sumArray[i]) - Number(_OR[i]);
+    };
+    is_or = "out";
+    d3.select(this).call(sumRects);
+  }
+  else{
+    var cost = 4;
+    counter = counter + 1;
+    for (var i = 0; i < _OR.length; i++) {
+      sumArray[i] = Number(sumArray[i]) + Number(_OR[i]);
+    };
+    // d3.select(this).call(circles(cost,counter));
+    is_or = "in";
+    d3.select(this).call(sumRects);
+  }
+});
+
+
+function redraw() {
+    svg.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+}
+
+var tooltip = d3.select("#map").append("div")
+    .attr("class", "tooltip");
+//map data convert from https://github.com/johan/world.geo.json/blob/master/countries.geo.json
+//tsv file is not used, but left the code for data join sample
+queue()
+    .defer(d3.json, "topo_world_countries_with_meta.json")
+    //.defer(d3.tsv, "world-country-names.tsv")
+    .await(ready);
+
+//function ready(error, world, names) {
+function ready(error, world) {
+
+  var countries = topojson.object(world, world.objects.countries).geometries,
+//      neighbors = topojson.neighbors(world, countries),
+      i = -1,
+      n = countries.length;
+/*
+  countries.forEach(function(d) {
+    var tryit = names.filter(function(n) { return d.id == n.id; })[0];
+    if (typeof tryit === "undefined"){
+      d.name = "Undefined";
+      //console.log(d);
+    } else {
+      d.name = tryit.name;
+    }
+  });
+*/
+    var country = svg.selectAll(".country").data(countries);
+    country
+    .enter()
+    .insert("path")
+    .attr("class", "country")
+    .attr("title", function(d,i) { return d.properties.name; })
+    .attr("id", function(d,i) { return d.id; })
+    .attr("d", path);
+    //.style("fill", function(d, i) { return color(d.color = d3.max(neighbors[i], function(n) { return countries[n].color; }) + 1 | 0); });
+
+    //Show/hide tooltip
+    country
+    .on("mousemove", function(d,i) {
+        var mouse = d3.mouse(svg.node()).map( function(d) { return parseInt(d); } );
+
+        tooltip
+        .classed("hidden", false)
+        .attr("style", "left:"+(mouse[0]+25)+"px;top:"+mouse[1]+"px")
+        //.html(d.properties.japanese)
+        .html(d.properties.name)
+    })
+    .on("mouseout",  function(d,i) {
+        tooltip.classed("hidden", true)
+    });
+
+    // city name
+    var g = svg.append("g");
+    d3.csv("asia.csv", function(error, data) {
+      g.selectAll("text")
+      .data(data)
+      .enter()
+      //text
+      .append("text")
+      .text(function(d) {
+        return d.country;
+      })
+      .attr("x", function(d) {
+        if(d.country == "バンガロール"){
+          //console.log(projection([d.lon, d.lat])[0])
+          return projection([d.lon, d.lat])[0] -65;
+        }
+        else if(d.country == "深セン"){
+          //console.log(projection([d.lon, d.lat])[0])
+          return projection([d.lon, d.lat])[0] -35;
+        }
+        else if(d.country == "クアラルンプール"){
+          //console.log(projection([d.lon, d.lat])[0])
+          return projection([d.lon, d.lat])[0] -60;
+        }
+        else if(d.country == "香港"){
+          //console.log(projection([d.lon, d.lat])[0])
+          return projection([d.lon, d.lat])[0] + 15;
+        }
+        else if(d.country == "武漢"){
+          //console.log(projection([d.lon, d.lat])[0])
+          return projection([d.lon, d.lat])[0] - 5;
+        }
+        else if(d.country == "ホーチミン"){
+          //console.log(projection([d.lon, d.lat])[0])
+          return projection([d.lon, d.lat])[0] + 5;
+        }
+        else if(d.country == "上海"){
+          //console.log(projection([d.lon, d.lat])[0])
+          return projection([d.lon, d.lat])[0] - 5;
+        }
+        else{
+          return projection([d.lon, d.lat])[0] + 3;
+        }
+      })
+      .attr("y", function(d) {
+          return projection([d.lon, d.lat])[1] + 4;
+      })
+      .attr("font-size","10px")
+      .attr("text-anchor", "start");
+      });
+
+}
+
+/*
+function circles(cost,counter){
+  if(d3.selectAll("rect").length != 0){
+    d3.selectAll("rect").remove();
+  }
+  var g = svg.append("g");
+    d3.csv("asia.csv", function(error, data) {
+    g.selectAll("rect")
+       .data(data)
+       .enter()
+       //circle
+       .append("rect")
+       .attr("x", function(d) {
+          return projection([d.lon, d.lat])[0];
+       })
+       .attr("y", function(d) {
+          return projection([d.lon, d.lat])[1] - (([d.basic_wages, d.electricity_charges, d.milk, d.criminal, d.office_rent])[cost])*0.5 - 5;
+       })
+       .attr("width",20)
+       .attr("height", function(d) {
+          //return 10;
+
+          //cost_total = cost_total + projection([d.basic_wages, d.electricity_charges, d.milk, d.//criminal, d.office_rent])[cost];
+          //return Math.sqrt((cost_total) * 2.5 / counter);
+
+          return (([d.basic_wages, d.electricity_charges, d.milk, d.criminal, d.office_rent])[cost])*0.5;
+       })
+
+     });
+  //console.log(g.selectAll("circle").length)
+  //console.log(counter)
+  //console.log(cost_total);
+}
+*/
+
+function sumRects(){
+  if(d3.selectAll("rect").length != 0){
+    d3.selectAll("rect").remove();
+    sumAllArray = [];
+  }
+  for(var i = 0; i < m; i++) {
+    sumAllArray.push([locations[i], sumArray[i], countries[i]]);
+  }
+  var g = svg.append("g");
+  g.selectAll("rect")
+       .data(sumAllArray)
+      //.sort(function(d, i){return d3.descending(sumAllArray[i][1]); })
+       .enter()
+       //circle
+       .append("rect")
+       //.sort()
+       .attr("x", function(d, i) {
+        if(sumAllArray[i][0][0] == 234.5415972222222){
+          return sumAllArray[i][0][0] - 65;
+        }
+        else if(sumAllArray[i][0][0] == 477.72798611111114){
+          return sumAllArray[i][0][0] - 35;
+        }
+        else if(sumAllArray[i][0][0] == 395.375625){
+          return sumAllArray[i][0][0] - 60;
+        }
+        else if(sumAllArray[i][0][0] == 478.26187500000003){
+          return sumAllArray[i][0][0] + 15;
+        }
+        else if(sumAllArray[i][0][0] == 471.58826388888883){
+          return sumAllArray[i][0][0] - 5;
+        }
+        else if(sumAllArray[i][0][0] == 428.3432638888888){
+          return sumAllArray[i][0][0] + 5;
+        }
+        else if(sumAllArray[i][0][0] == 526.9125){
+          return sumAllArray[i][0][0] - 5;
+        }
+        else{
+          return sumAllArray[i][0][0];
+        }
+       })
+       .attr("y", function(d, i) {
+          //console.log(countries[i][0])
+          return sumAllArray[i][0][1] - (sumAllArray[i][1])*0.3 - 5;
+       })
+       .attr("width",20)
+       .attr("height", function(d, i) {
+          //console.log(is_bw)
+          //console.log(Number(_CR[i]))
+          //console.log(sumAllArray[i][1])
+          //return (sumAllArray[i][1])*0.3;
+          return 0.1;
+       })
+       .attr("class",function(d, i){
+        if(sumAllArray[i][0][0] == 387.30055555555555){
+          return "symbol_base";
+        }
+        else{
+          return "symbol";
+        }
+      })
+
+      svg.selectAll("rect")
+      .transition()
+      .duration(750)
+
+      .ease("bounce")
+      .delay(function(d, i) { return i * -10; })
+      .attr("height", function(d, i) {
+         return (sumAllArray[i][1])*0.3;
+       });
+}
+
+
+</script>
+</body>
+</html>

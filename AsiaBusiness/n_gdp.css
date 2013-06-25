@@ -1,0 +1,17 @@
+@charset "utf-8";
+
+#JPN, #KOR, #TWN, #MYS{
+ fill: #dacc9e;
+}
+#CHN, #THA, #IDN{
+ fill: #dacc9e;
+ opacity:.75;
+}
+#IND,#VNM,#LAO,#BTN,#PHL{
+fill: #dacc9e;
+ opacity:.5;
+}
+#BNG,#KHM,#MMR,#NPL,#BGD{
+fill: #dacc9e;
+ opacity:.25;
+}
